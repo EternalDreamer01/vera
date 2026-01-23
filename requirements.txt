@@ -1,0 +1,13 @@
+# requests
+gitpython
+tqdm
+python-benedict[all]
+python-dotenv
+packaging
+# ollama
+dask[complete]
+argcomplete
+frida
+frida-tools
+sqlite3
+cvss

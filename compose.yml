@@ -1,0 +1,48 @@
+services:
+  zephyr:
+    image: ghcr.io/zephyrproject-rtos/zephyr-build:latest
+
+  zephyr-upgraded:
+    image: zephyr:latest-upgraded
+    build: ./docker/upgrade/zephyr
+
+  eclipse-sdv:
+    image: eclipsefdn/sdv-eclipse-org:mr-158--41c0baa
+
+  eclipse-sdv-upgraded:
+    image: eclipse-sdv:158-upgraded
+    build: ./docker/upgrade/eclipse
+
+  autosd-upgraded:
+    image: autosd:9-qemux86_64-upgraded
+    build: ./docker/upgrade/autosd
+
+  ros:
+    image: ros:humble-perception-jammy
+
+  ros-upgraded:
+    image: ros:humble-perception-jammy-upgraded
+    build: ./docker/upgrade/ros
+
+  qnxros2-upgraded:
+    image: qnxros2:rolling-upgraded
+    build:
+        context: ./docker/qnxros2/rolling
+        args:
+          ROS2DIST: rolling
+          USER_NAME: $USER
+          GROUP_NAME: $USER
+          USER_ID: ${UID:-1000}
+          GROUP_ID: ${GID:-1000}
+
+  teslaos-upgraded:
+    image: teslaos:amd-5.4-upgraded
+    build: ./docker/teslaos/amd-5.4
+
+  vxbuild-upgraded:
+    image: vxbuild:22.04-upgraded
+    build: ./docker/vxbuild/22.04
+
+  vxros2build-upgraded:
+    image: vxros2build:humble-upgraded
+    build: ./docker/vxros2build/humble

@@ -1,0 +1,36 @@
+{
+	// Treat new files (before first save) as LaTeX files.
+	// "files.defaultLanguage": "latex",
+	// Treat LaTeX package (.sty) and class (.cls) files as LaTeX files.
+	"files.associations": {
+		"*.sty": "latex",
+		"*.cls": "latex",
+		"*.sed": "shellscript"
+	},
+	// Hide the following file types from the VS Code folder list.
+	"files.exclude": {
+		"**/*.4ct": true,
+		"**/*.4tc": true,
+		"**/*.aux": true,
+		"**/*.bcf": true,
+		"**/*.fdb_latexmk": true,
+		"**/*.idv": true,
+		"**/*.lg": true,
+		"**/*.lof": true,
+		"**/*.synctex.gz": true,
+		"**/*.synctex(busy)": true,
+		"**/*.tmp": true,
+		"**/*.xref": true,
+		"**/*.fls": true,
+		"**/*.loc": true,
+		"**/*.run.xml": true,
+		"**/*.soc": true,
+		"**/*.snm": true,
+		"**/*.blg": true,
+		"**/*-SAVE-ERROR": true
+	},
+	"latex-workshop.latex.autoBuild.cleanAndRetry.enabled": false,
+	"latex-workshop.latex.outDir": "%DIR%/paper",
+	"latex-workshop.latex.clean.subfolder.enabled": true,
+	"latex-workshop.view.pdf.viewer": "tab",
+}
