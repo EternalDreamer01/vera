@@ -130,6 +130,23 @@ Show all results in a table:
 ./parse.sh table
 ```
 
+Show one CVE information:
+```sh
+./parse.sh cve CVE-2022-35737 help        # Show help
+
+./parse.sh cve CVE-2022-35737             # MITRE format full JSON data
+./parse.sh cve CVE-2022-35737 .containers # MITRE format JSON path
+
+./parse.sh cve CVE-2022-35737 description # Description
+./parse.sh cve CVE-2022-35737 score       # Scores CVSS, EPSS
+./parse.sh cve CVE-2022-35737 exploit     # Search online exploits or PoC
+
+
+./parse.sh cve ASB-A-266433089            # Android format support
+./parse.sh ASB-A-266433089                # Autodetect CVE argument
+```
+
+
 ### Analyse OS and Verify results
 
 #### Function presence
