@@ -71,7 +71,11 @@ args=("$@")
 
 GRYPE_DB_PATH="$HOME/.cache/grype/db/6/vulnerability.db"
 query_grype_db() {
-	if [[ "$cveId" == CVE-* ]]; then
+	if [ ! -f "$GRYPE_DB_PATH" ]; then
+		echo "Grype database not found at '$GRYPE_DB_PATH'" >&2
+		exit 1
+	
+	elif [[ "$cveId" == CVE-* ]]; then
 		sqlite3 "$GRYPE_DB_PATH" "$1"
 	fi
 }
