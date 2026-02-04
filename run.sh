@@ -3,14 +3,14 @@
 # @file      run.sh
 # @brief     
 # @date      Fr Jul 2025
-# @author    Dimitri Simon
+# @author    
 # 
 # PROJECT:   VERA
 # 
 # MODIFIED:  Fri Jul 11 2025
-# BY:        Dimitri Simon
+# BY:        
 # 
-# Copyright (c) 2025 Dimitri Simon
+# Copyright (c) 2025 
 # 
 ################################################################################
 

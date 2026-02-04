@@ -3,14 +3,14 @@
 # @file      ff.sh
 # @brief     
 # @date      Mo Jul 2025
-# @author    Dimitri Simon
+# @author    
 # 
 # PROJECT:   CVE checker
 # 
 # MODIFIED:  Tue Jul 08 2025
-# BY:        Dimitri Simon
+# BY:        
 # 
-# Copyright (c) 2025 Dimitri Simon
+# Copyright (c) 2025 
 # 
 ################################################################################
 

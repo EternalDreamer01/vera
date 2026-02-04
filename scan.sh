@@ -3,14 +3,14 @@
 # @file      scan.sh
 # @brief     
 # @date      Su Aug 2025
-# @author    Dimitri Simon
+# @author    
 # 
 # PROJECT:   VERA
 # 
 # MODIFIED:  Sun Aug 17 2025
-# BY:        Dimitri Simon
+# BY:        
 # 
-# Copyright (c) 2025 Dimitri Simon
+# Copyright (c) 2025 
 # 
 ################################################################################
 

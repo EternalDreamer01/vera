@@ -3,14 +3,14 @@
 # @file      merge.sh
 # @brief     
 # @date      Tu Jan 2026
-# @author    Dimitri Simon
+# @author    
 # 
 # PROJECT:   utils
 # 
 # MODIFIED:  Tue Jan 06 2026
-# BY:        Dimitri Simon
+# BY:        
 # 
-# Copyright (c) 2026 Dimitri Simon
+# Copyright (c) 2026 
 # 
 ################################################################################
 

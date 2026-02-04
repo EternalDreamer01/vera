@@ -3,14 +3,14 @@
 # @file      cve.sh
 # @brief     
 # @date      Tu Jul 2025
-# @author    Dimitri Simon
+# @author    
 # 
 # PROJECT:   parser
 # 
 # MODIFIED:  Tue Jul 22 2025
-# BY:        Dimitri Simon
+# BY:        
 # 
-# Copyright (c) 2025 Dimitri Simon
+# Copyright (c) 2025 
 # 
 ################################################################################
 

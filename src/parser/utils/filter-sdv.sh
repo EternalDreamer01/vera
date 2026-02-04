@@ -19,14 +19,14 @@
 #              found in a compiled binary by them
 #
 # @date      Mo Jul 2025
-# @author    Dimitri Simon
+# @author    
 # 
 # PROJECT:   VERA
 # 
 # MODIFIED:  Tue Jul 08 2025
-# BY:        Dimitri Simon
+# BY:        
 # 
-# Copyright (c) 2025 Dimitri Simon
+# Copyright (c) 2025 
 # 
 ################################################################################
 

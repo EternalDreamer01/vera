@@ -3,14 +3,14 @@
 # @file      parser.sh
 # @brief     
 # @date      Sa Jul 2025
-# @author    Dimitri Simon
+# @author    
 # 
 # PROJECT:   VERA
 # 
 # MODIFIED:  Sat Jul 19 2025
-# BY:        Dimitri Simon
+# BY:        
 # 
-# Copyright (c) 2025 Dimitri Simon
+# Copyright (c) 2025 
 # 
 ################################################################################
 
