@@ -69,6 +69,23 @@ fi
 args=("$@")
 # echo "$cveId $path $args"
 
+GRYPE_DB_PATH="$HOME/.cache/grype/db/6/vulnerability.db"
+query_grype_db() {
+	if [[ "$cveId" == CVE-* ]]; then
+		sqlite3 "$GRYPE_DB_PATH" "$1"
+	fi
+}
+is_kev() {
+	if [[ $(query_grype_db "SELECT COUNT(cve) FROM known_exploited_vulnerability_handles WHERE cve = '$cveId'") == '1' ]]; then
+		echo -e "\x1b[1;31mKnown Exploited Vulnerability in the wild\x1b[0m\n"
+	fi
+}
+
+get_epss() {
+	query_grype_db "SELECT epss, percentile FROM epss_handles WHERE cve = '$cveId'"
+}
+
+
 if [[ "$path" == "d" || "$path" == "desc" || "$path" == "description" ]]; then
 	if [[ "$cveId" != CVE-* ]]; then
 		path=".details"
@@ -78,10 +95,8 @@ if [[ "$path" == "d" || "$path" == "desc" || "$path" == "description" ]]; then
 	args=(-r)
 
 elif [[ "$path" == "e" || "$path" == "exploit" ]]; then
-	if [[ "$cveId" == CVE-* ]] && \
-		[[ "$(jq --arg cve "$cveId" 'any(.vulnerabilities[]; .cveID == $cve)' cisa.json)" == true ]]; then
-		echo -e "\x1b[1;31mKnown Exploited Vulnerability in the wild\x1b[0m\n"
-	fi
+	is_kev
+
 	exploits="$(src/parser/utils/get-online-exploits.sh "$cveId")"
 	exploits="$(echo "$exploits" | sed -r '/^\s*$/d' | sort -u | sort -k1,1 -rnt\;)"
 	exploit_option="$1"
@@ -232,6 +247,8 @@ elif [[ "$path" == "r" || "$path" == "ref" || "$path" == "reference" ]]; then
 	args=(-r)
 
 elif [[ "$path" == "s" || "$path" == "score" ]]; then
+	is_kev
+
 	if [[ "$cveId" != CVE-* ]]; then
 		data="$("$0" "$cveId" ".affected[]?.ecosystem_specific" -r)"
 		echo "Severity: $(echo -n "$data" | jq -r .severity | head -n 1 | src/parser/utils/score-colour.sed)"
@@ -247,9 +264,9 @@ elif [[ "$path" == "s" || "$path" == "score" ]]; then
 		exit 0
 
 	else
-		epss_entries="$(grep -im 1 "$cveId," epss_scores.csv | cut -d, -f2-)"
-		echo "EPSS:       $(echo "$epss_entries" | cut -d, -f1 | src/parser/utils/score-colour.sed)"
-		echo "Percentile: $(echo "$epss_entries" | cut -d, -f2 | src/parser/utils/score-colour.sed)"
+		epss_entries="$(get_epss "$cveId")"
+		echo "EPSS:       $(echo "$epss_entries" | cut '-d|' -f1 | src/parser/utils/score-colour.sed)"
+		echo "Percentile: $(echo "$epss_entries" | cut '-d|' -f2 | src/parser/utils/score-colour.sed)"
 		echo
 		output="$("$0" "$cveId" '
 	.containers.cna.metrics // [] 
