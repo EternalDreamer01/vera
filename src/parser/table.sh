@@ -18,6 +18,9 @@ result=""
 DEFAULT_SCANNER=true
 SCANNER="*"
 FILTER=
+OUT_TYPE=""
+
+# $0 [<scanner> [<filter>]]
 
 if [[ -n "$1" && "$1" != -* ]]; then
 	SCANNER="$1"
@@ -27,6 +30,11 @@ fi
 
 if [ -n "$1" ]; then
 	FILTER="$1"
+	shift
+fi
+
+if [ -n "$1" ]; then
+	OUT_TYPE="$1"
 	shift
 fi
 
@@ -64,23 +72,26 @@ print_row() {
 	result=""
 	i=0
 
+
 	if [ "$SCANNER" != "*" ]; then
 		analysis=".$SCANNER"
 	fi
 	# echo "$SCANNER :: $analysis"
 
-	for f in out/${2}/${1}${analysis}.json; do
-		resultfile="$f"
-		if [[ "$f" == *.trivy.json ]]; then
-			# echo "$f skipped"
-			continue
-		fi
+	if [ -f out/${2}/${1}${analysis}.json ]; then
+		resultfile="out/${2}/${1}${analysis}.json"
+		# if [[ "$f" == *.trivy.json ]]; then
+		# 	# echo "$f skipped"
+		# 	continue
+		# fi
 
 		if [ -f "$resultfile" ]; then
 			result="$(src/parser/utils/read-report.sh "$resultfile" 1 0)"
 			((i++))
 		fi
-	done
+	fi
+
+	# echo 1
 
 	cbt=
 	# Merging with CVE Binary Tool results
@@ -99,34 +110,65 @@ print_row() {
 
 	# echo "$result" | grep :not-fix
 	# echo "$FILTER"
+	# echo 2
 	if [ "$FILTER" = "--sdv" ]; then
 		# echo "filtering..."
 		result="$(echo -n "$result" | src/parser/utils/filter-sdv.sh)"
 		cbt="$(echo -n "$cbt" | src/parser/utils/filter-sdv.sh)"
 		# echo "$result" | sort -u
 	fi
+	# echo 3
+	# echo 1
 	# echo "$result" | head -n 30
 	# echo "$cbt" | grep -E 'CVE-2025-6965|CVE-2025-5914'
 	
 	total=$(count_cves)
+	# echo 4
 
-	result="$(src/parser/utils/get_online_exploits_multiple.py "$result")"
-	cbt="$(src/parser/utils/get_online_exploits_multiple.py "$cbt")"
+	result="$(src/parser/utils/get_online_exploits_multiple.py "$result" 1)"
+	# echo 4.1
+	cbt="$(src/parser/utils/get_online_exploits_multiple.py "$cbt" 1)"
 	# echo "$result" | cut -d: -f7 | sort -u
 	# exit 1
+	# echo 5
 
-	total_epss=$(echo "$result" | cut -d: -f2 | grep -viE 'null|-1|^$' | grep -c '^')
-	total_epss_cbt=$(echo "$cbt" | cut -d: -f2 | grep -viE 'null|-1|^$' | grep -c '^')
+	total_epss=$(echo -n "$result" | cut -d: -f2 | grep -viE 'null|-1|^$' | grep -c '^')
+	total_epss_cbt=$(echo -n "$cbt" | cut -d: -f2 | grep -viE 'null|-1|^$' | grep -c '^')
 	total_kev=$(echo -n "$result" | cut -d: -f7 | grep -E '^X$' | grep -c '^')
 	total_kev_cbt=$(echo -n "$cbt" | cut -d: -f7 | grep -E '^X$' | grep -c '^')
 	total_exploits=$(echo -n "$result" | cut -d: -f9 | grep -E '^[0-9]+\*|P|E$' | grep -c '^')
 	total_exploits_cbt=$(echo -n "$cbt" | cut -d: -f9 | grep -E '^[0-9]+\*|P|E$' | grep -c '^')
+
+	total_rce=$(echo "$result" | cut -d: -f6 | grep -i "rce" | grep -c '^')
+	total_rce_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "rce" | grep -c '^')
+	total_lpe=$(echo "$result" | cut -d: -f6 | grep -i "lpe" | grep -c '^')
+	total_lpe_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "lpe" | grep -c '^')
+	total_id=$(echo "$result" | cut -d: -f6 | grep -i "id" | grep -c '^')
+	total_id_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "id" | grep -c '^')
+	total_dos=$(echo "$result" | cut -d: -f6 | grep -i "dos" | grep -c '^')
+	total_dos_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "lpe" | grep -c '^')
+	total_unknown=$(echo "$result" | cut -d: -f6 | grep -i "?" | grep -c '^')
+	total_unknown_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "?" | grep -c '^')
+	# echo "$cbt"
+
+	total_rce_num=
+	total_lpe_num=
+	total_id_num=
+	total_dos_num=
+	total_unknown_num=
+
+	total_num=$total
+	total_epss_num=$total_epss
 
 	critical=$(count_cvss 9)
 	high=$(count_cvss 7 9)
 	medium=$(count_cvss 4 7)
 	low=$(count_cvss 0 4)
 	unknown=$(count_cvss -1 0)
+
+	critical_num=$critical
+	high_num=$high
+	medium_num=$medium
 
 	result="$cbt"
 	total_cbt=$(count_cves)
@@ -138,9 +180,11 @@ print_row() {
 
 	if [ -n "$cbt" ]; then
 		if [ $total_cbt -gt 0 ]; then
+			total_num=$((total + total_cbt))
 			total="$total + $total_cbt"
 		fi
 		if [ $total_epss_cbt -gt 0 ]; then
+			total_epss_num=$((total_epss + total_epss_cbt))
 			total_epss="$total_epss + $total_epss_cbt"
 		fi
 		if [ $total_kev_cbt -gt 0 ]; then
@@ -150,12 +194,15 @@ print_row() {
 			total_exploits="$total_exploits + $total_exploits_cbt"
 		fi
 		if [ $critical_cbt -gt 0 ]; then
+			critical_num=$((critical + critical_cbt))
 			critical="$critical + $critical_cbt"
 		fi
 		if [ $high_cbt -gt 0 ]; then
+			high_num=$((high + high_cbt))
 			high="$high + $high_cbt"
 		fi
 		if [ $medium_cbt -gt 0 ]; then
+			medium_num=$((medium + medium_cbt))
 			medium="$medium + $medium_cbt"
 		fi
 		if [ $low_cbt -gt 0 ]; then
@@ -164,13 +211,39 @@ print_row() {
 		if [ $unknown_cbt -gt 0 ]; then
 			unknown="$unknown + $unknown_cbt"
 		fi
+
+		if [ $total_rce_cbt -gt 0 ]; then
+			total_rce_num=$((total_rce + total_rce_cbt))
+			total_rce="$total_rce + $total_rce_cbt"
+		fi
+		if [ $total_lpe_cbt -gt 0 ]; then
+			total_lpe_num=$((total_lpe + total_lpe_cbt))
+			total_lpe="$total_lpe + $total_lpe_cbt"
+		fi
+		if [ $total_id_cbt -gt 0 ]; then
+			total_id_num=$((total_id + total_id_cbt))
+			total_id="$total_id + $total_id_cbt"
+		fi
+		if [ $total_dos_cbt -gt 0 ]; then
+			total_dos_num=$((total_dos + total_dos_cbt))
+			total_dos="$total_dos + $total_dos_cbt"
+		fi
+		if [ $total_unknown_cbt -gt 0 ]; then
+			total_unknown_num=$((total_unknown + total_unknown_cbt))
+			total_unknown="$total_unknown + $total_unknown_cbt"
+		fi
 	fi
 
 	printf "\e[1m| $os $i "
-	printf "\e[0;1;2m| %-9s \e[1;2;33m| %-9s \e[0;1;33m| %-9s \e[1;31m| %-9s \e[1;35m| %-9s |" \
-		"$unknown" "$low" "$medium" "$high" "$critical"
-	printf "\e[0;1m %-9s |\e[0m %-9s \e[1;31m| %-9s \e[0;36m| %-9s |\e[0m\n" \
-		"$total" "$total_epss" "$total_kev" "$total_exploits"
+	if [ "$OUT_TYPE" = "--types" ]; then
+		printf "\e[1;35m| %-9s \e[1;31m| %-9s \e[1;33m| %-9s \e[1;34m| %-9s \e[0;1;2m| %-9s \e[0;1m| %-9s |\e[0m\n" \
+			"$total_rce ($total_rce_num)" "$total_lpe ($total_lpe_num)" "$total_id ($total_id_num)" "$total_dos ($total_dos_num)" "$total_unknown ($total_unknown_num)" "$total ($total_num)"
+	else
+		printf "\e[0;1;2m| %-9s \e[1;2;33m| %-9s \e[0;1;33m| %-9s \e[1;31m| %-9s \e[1;35m| %-9s |" \
+			"$unknown" "$low" "$medium ($medium_num)" "$high ($high_num)" "$critical ($critical_num)"
+		printf "\e[0;1m %-15s %s |\e[0m %-15s \e[1;31m| %-9s \e[0;36m| %-9s |\e[0m\n" \
+			"$total ($total_num)" $((high_num + critical_num)) "$total_epss ($total_epss_num)" "$total_kev" "$total_exploits"
+	fi
 }
 
 result_os() {
@@ -181,9 +254,15 @@ result_fw() {
 	print_row "$cves_type" "fw/$@"
 }
 
-printf "\e[1m| %-${FIRST_COL_LEN}s   \e[1;2m| *Unknown* \e[1;2;33m| LOW       \e[0;1;33m| MEDIUM    \e[1;31m| HIGH      \e[1;35m| CRITICAL  |\e[0;1m TOTAL     |\e[0m EPSS      \e[1;31m| KEV       \e[0;36m| Exploits  |\e[0m\n" \
-	"OS"
-printf "\e[1m|:-%-${FIRST_COL_LEN}s  \e[1;2m|:-:        \e[1;2;33m|:-:        \e[0;1;33m|:-:        \e[1;31m|:-:        \e[1;35m|:-:        |\e[0;1m:-:        |\e[0m:-:        \e[1;31m|:-:        \e[0;36m|:-:        |\e[0m\n"
+if [ "$OUT_TYPE" = "--types" ]; then
+	printf "\e[1m| %-${FIRST_COL_LEN}s   \e[1;35m| RCE       \e[1;31m| LPE       \e[0;1;33m| ID        \e[1;34m| DoS       \e[0;1;2m| *UNKNOWN* |\e[0;1m\n" \
+		"OS"
+	printf "\e[1m|:-%-${FIRST_COL_LEN}s  \e[1;35m|:-:        \e[1;31m|:-:        \e[0;1;33m|:-:        \e[1;34m|:-:        \e[0;1;2m|:-:        |\e[0;1m\n"
+else
+	printf "\e[1m| %-${FIRST_COL_LEN}s   \e[1;2m| *Unknown* \e[1;2;33m| LOW       \e[0;1;33m| MEDIUM    \e[1;31m| HIGH      \e[1;35m| CRITICAL  |\e[0;1m TOTAL           |\e[0m EPSS            \e[1;31m| KEV       \e[0;36m| Exploits  |\e[0m\n" \
+		"OS"
+	printf "\e[1m|:-%-${FIRST_COL_LEN}s  \e[1;2m|:-:        \e[1;2;33m|:-:        \e[0;1;33m|:-:        \e[1;31m|:-:        \e[1;35m|:-:        |\e[0;1m:-:              |\e[0m:-:              \e[1;31m|:-:        \e[0;36m|:-:        |\e[0m\n"
+fi
 
 cves_type=upgraded
 if [ "$DEFAULT_SCANNER" = true ]; then

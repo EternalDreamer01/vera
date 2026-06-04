@@ -132,7 +132,7 @@ def make_tasks(
 def write_data(data: dict, affected: dict | list[dict] | None = None) -> dict:
 	# Get the highest CVSS score
 	if not isinstance(data.get("cvssMaxScore"), float) or data.get("cvssMaxScore") == -1:
-		data["cvssMaxScore"] = get_cve_data(data["cveId"], False)[0]
+		data["cvssMaxScore"] = get_cve_data(data["cveId"], None)[0]
 	return {
 		"cveId": data["cveId"],
 		"cpe": {

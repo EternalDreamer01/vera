@@ -291,7 +291,7 @@ GITHUB_SEARCH = "https://github.com/advisories?query={}"
 OSV_VULN = "https://osv.dev/vulnerability/UBUNTU-{}"
 OSV_ANDROID = "https://api.osv.dev/v1/vulns/{}"
 
-def get_cve_data(cveid: str, ecosystem_id: str, allow_local: str = "yes") -> (
+def get_cve_data(cveid: str, ecosystem_id: str|None, allow_local: str = "yes") -> (
 		float,
 		str,
 		str,
@@ -313,7 +313,7 @@ def get_cve_data(cveid: str, ecosystem_id: str, allow_local: str = "yes") -> (
 	if allow_local != "no":
 
 		# Android
-		if ecosystem_id is not None:
+		if isinstance(ecosystem_id, str):
 			import zipfile, json
 
 			try:

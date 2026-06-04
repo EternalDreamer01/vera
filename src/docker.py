@@ -112,7 +112,7 @@ def container_exec_run(container: object, cmd: str | list[str], good_status: lis
 	return output
 
 def pip_audit(container: object, update: str, install_pip_dep: str, py_version: str) -> list[dict]:
-	PY_VERSION = "3.9.23"
+	PY_VERSION = "3.10.20"
 	PY_USE_VERSION = "3"
  
 	container_exec_run(
@@ -124,8 +124,8 @@ def pip_audit(container: object, update: str, install_pip_dep: str, py_version: 
 		good_status=[0,100], # RedHat exit status on update
 	)
 
-	# If version is below 3.9, upgrade
-	if Version(py_version) < Version("3.9.0.0"):
+	# If version is below 3.10, upgrade
+	if Version(py_version) < Version("3.10"):
 		container_exec_run(
 			container, [
 				f"wget https://www.python.org/ftp/python/{PY_VERSION}/Python-{PY_VERSION}.tgz",

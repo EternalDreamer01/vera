@@ -160,7 +160,7 @@ for image_name in "$@"; do
 		info "Removing all non-libraries..."
 		find "$scan_bin_path" -type f -a ! -name "*.so" -delete
 
-		exec_cbt "$scan_bin_path/lib" --exploits --metrics -f json -o "$output_filepath"
+		exec_cbt "$scan_bin_path/lib" --metrics -f json -o "$output_filepath"
 
 	elif [[ $scanner == "osv" ]]; then
 		osv-scanner scan image -f json --verbosity warn --output "$output_filepath" "$image_name"
@@ -171,7 +171,7 @@ for image_name in "$@"; do
 			args="--distro"
 			exit 1
 		fi
-		grype "$image_name" --scope all-layers -o json --file "$output_filepath"
+		grype "$image_name" -o json --file "$output_filepath"
 	
 	elif [[ $scanner == "trivy" ]]; then
 		trivy image --scanners vuln -f json -o "$output_filepath" "$image_name"

@@ -76,3 +76,4 @@ osv/
 .env.secret
 
 out/
+cves.json
