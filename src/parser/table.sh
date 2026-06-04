@@ -146,7 +146,7 @@ print_row() {
 	total_id=$(echo "$result" | cut -d: -f6 | grep -i "id" | grep -c '^')
 	total_id_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "id" | grep -c '^')
 	total_dos=$(echo "$result" | cut -d: -f6 | grep -i "dos" | grep -c '^')
-	total_dos_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "lpe" | grep -c '^')
+	total_dos_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "dos" | grep -c '^')
 	total_unknown=$(echo "$result" | cut -d: -f6 | grep -i "?" | grep -c '^')
 	total_unknown_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "?" | grep -c '^')
 	# echo "$cbt"
@@ -238,6 +238,7 @@ print_row() {
 	if [ "$OUT_TYPE" = "--types" ]; then
 		printf "\e[1;35m| %-9s \e[1;31m| %-9s \e[1;33m| %-9s \e[1;34m| %-9s \e[0;1;2m| %-9s \e[0;1m| %-9s |\e[0m\n" \
 			"$total_rce ($total_rce_num)" "$total_lpe ($total_lpe_num)" "$total_id ($total_id_num)" "$total_dos ($total_dos_num)" "$total_unknown ($total_unknown_num)" "$total ($total_num)"
+		echo $((total_rce_num + total_lpe_num + total_id_num + total_dos_num + total_unknown_num))
 	else
 		printf "\e[0;1;2m| %-9s \e[1;2;33m| %-9s \e[0;1;33m| %-9s \e[1;31m| %-9s \e[1;35m| %-9s |" \
 			"$unknown" "$low" "$medium ($medium_num)" "$high ($high_num)" "$critical ($critical_num)"
