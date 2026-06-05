@@ -149,7 +149,8 @@ print_row() {
 	total_dos_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "dos" | grep -c '^')
 	total_unknown=$(echo "$result" | cut -d: -f6 | grep -i "?" | grep -c '^')
 	total_unknown_cbt=$(echo "$cbt" | cut -d: -f6 | grep -i "?" | grep -c '^')
-	# echo "$cbt"
+	# echo "$result" | cut -d: -f2 | grep -E 'null|-1|^$'
+	# echo "$result" | cut -d: -f2 | grep -E '0\.000[0-2][0-9]*.+'
 
 	total_rce_num=
 	total_lpe_num=
@@ -165,6 +166,17 @@ print_row() {
 	medium=$(count_cvss 4 7)
 	low=$(count_cvss 0 4)
 	unknown=$(count_cvss -1 0)
+
+	epss_critical=$(echo -n "$result" | cut -d: -f2 | grep -E '^0\.([1-9]|0[89])[0-9]*.+$' | grep -c '^')
+	epss_critical_cbt=$(echo -n "$cbt" | cut -d: -f2 | grep -E '^0\.([1-9]|0[89])[0-9]*.+$' | grep -c '^')
+	epss_high=$(echo -n "$result" | cut -d: -f2 | grep -E '^0\.(0[1-7]|00[4-9])[0-9]*.+$' | grep -c '^')
+	epss_high_cbt=$(echo -n "$cbt" | cut -d: -f2 | grep -E '^0\.(0[1-7]|00[4-9])[0-9]*.+$' | grep -c '^')
+	epss_medium=$(echo -n "$result" | cut -d: -f2 | grep -E '^0\.(00[1-3]|000[4-9])[0-9]*.+$' | grep -c '^')
+	epss_medium_cbt=$(echo -n "$cbt" | cut -d: -f2 | grep -E '^0\.(00[1-3]|000[4-9])[0-9]*.+$' | grep -c '^')
+	epss_low=$(echo -n "$result" | cut -d: -f2 | grep -E '0\.000[0-2][0-9]*.+|[0-9]e-0*[4-9]+' | grep -c '^')
+	epss_low_cbt=$(echo -n "$cbt" | cut -d: -f2 | grep -E '0\.000[0-2][0-9]*.+|[0-9]e-0*[4-9]+' | grep -c '^')
+	epss_unknown=$(echo -n "$result" | cut -d: -f2 | grep -E 'null|-1|^$' | grep -c '^')
+	epss_unknown_cbt=$(echo -n "$cbt" | cut -d: -f2 | grep -E 'null|-1|^$' | grep -c '^')
 
 	critical_num=$critical
 	high_num=$high
@@ -232,6 +244,28 @@ print_row() {
 			total_unknown_num=$((total_unknown + total_unknown_cbt))
 			total_unknown="$total_unknown + $total_unknown_cbt"
 		fi
+
+
+		if [ $epss_critical_cbt -gt 0 ]; then
+			epss_critical_num=$((epss_critical + epss_critical_cbt))
+			epss_critical="$epss_critical + $epss_critical_cbt"
+		fi
+		if [ $epss_high_cbt -gt 0 ]; then
+			epss_high_num=$((epss_high + epss_high_cbt))
+			epss_high="$epss_high + $epss_high_cbt"
+		fi
+		if [ $epss_medium_cbt -gt 0 ]; then
+			epss_medium_num=$((epss_medium + epss_medium_cbt))
+			epss_medium="$epss_medium + $epss_medium_cbt"
+		fi
+		if [ $epss_low_cbt -gt 0 ]; then
+			epss_low_num=$((epss_low + epss_low_cbt))
+			epss_low="$epss_low + $epss_low_cbt"
+		fi
+		if [ $epss_unknown_cbt -gt 0 ]; then
+			epss_unknown_num=$((epss_unknown + epss_unknown_cbt))
+			epss_unknown="$epss_unknown + $epss_unknown_cbt"
+		fi
 	fi
 
 	printf "\e[1m| $os $i "
@@ -239,6 +273,12 @@ print_row() {
 		printf "\e[1;35m| %-9s \e[1;31m| %-9s \e[1;33m| %-9s \e[1;34m| %-9s \e[0;1;2m| %-9s \e[0;1m| %-9s |\e[0m\n" \
 			"$total_rce ($total_rce_num)" "$total_lpe ($total_lpe_num)" "$total_id ($total_id_num)" "$total_dos ($total_dos_num)" "$total_unknown ($total_unknown_num)" "$total ($total_num)"
 		echo $((total_rce_num + total_lpe_num + total_id_num + total_dos_num + total_unknown_num))
+	
+	elif [ "$OUT_TYPE" = "--epss" ]; then
+		printf "\e[1;35m| %-9s \e[1;31m| %-9s \e[1;33m| %-9s \e[1;34m| %-9s \e[0;1;2m| %-9s \e[0;1m| %-9s |\e[0m\n" \
+			"$epss_critical ($epss_critical_num)" "$epss_high ($epss_high_num)" "$epss_medium ($epss_medium_num)" "$epss_low ($epss_low_num)" "$epss_unknown ($epss_unknown_num)" "$total ($total_num)"
+		echo $((epss_critical_num + epss_high_num + epss_medium_num + epss_low_num + epss_unknown_num))
+
 	else
 		printf "\e[0;1;2m| %-9s \e[1;2;33m| %-9s \e[0;1;33m| %-9s \e[1;31m| %-9s \e[1;35m| %-9s |" \
 			"$unknown" "$low" "$medium ($medium_num)" "$high ($high_num)" "$critical ($critical_num)"

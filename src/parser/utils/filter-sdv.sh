@@ -84,7 +84,7 @@ exclude_bin=(
 	scp
 	traceroute
 	ncurses
-	tcpdump=.+ # tcpdump is also the vendof of libpcap
+	tcpdump=.+ # tcpdump is also the vendor of libpcap
 	iperf3
 	sharutils
 	apache	# Likely no service

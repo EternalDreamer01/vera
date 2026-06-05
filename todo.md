@@ -2,6 +2,9 @@
 ## Parser Features
 * Determine SBX/VME with parser
 * Filter CVEs for middleware: exclude current OS/kernel CVEs
+* Add exploit db:
+	* Nuclei
+	* Metasploit
 
 ## Analyser Features
 * Fully automate exploitability check:
