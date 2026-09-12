@@ -305,6 +305,26 @@ elif jq -e 'type == "object" and all(.Results[]; has("Target"))' "$filepath" &> 
 	| "\(.cvss):-1:\(.name)=\(.version):\(.ecosystem):\(.cveId)"
 	' "$filepath" | sort -u
 
+# pip-audit
+elif jq -e 'type == "object" and all(.dependencies[]; has("vulns"))' "$filepath" &> /dev/null; then
+	jq -r '[
+		.dependencies[] as $pkg
+		| $pkg.vulns[]?
+		| .aliases[]?
+		| select(startswith("CVE-")) as $cveId
+		| {
+			name: ($pkg.name // ""),
+			'$filter_full'version: ($pkg.version // ""),
+			ecosystem: "PyPI",
+			cveId: $cveId,
+			cvss: -1,
+			epss: -1,
+			percentile: -1,
+			state: "not-fixed",
+			impact: ""
+			}
+	]'
+
 # Compressed result
 elif jq -e 'all(.[]; has("cveId"))' "$filepath" &> /dev/null; then
 	# echo "Compressed"

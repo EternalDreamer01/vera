@@ -6,6 +6,11 @@ if [ -z "$filepath" ]; then
 	exit 1
 fi
 
+# PROJECT_ROOT="$(realpath "$(dirname "$0")/../..")"
+# "$PROJECT_ROOT/src/parser/utils/read-report.sh" "$filepath"
+
+# exit 0
+
 # Yocto's built-in cve-check
 if jq -e 'all(.package[] | .issue[]; has("id"))' "$filepath" &> /dev/null; then
 	jq -r '
@@ -160,6 +165,26 @@ elif jq -e 'all(.Results[]; has("Target"))' "$filepath" &> /dev/null; then
 	| group_by(.cveId)
 	| map(max_by(.score))
 	' "$filepath"
+
+# pip-audit
+elif jq -e 'type == "object" and all(.dependencies[]; has("vulns"))' "$filepath" &> /dev/null; then
+	jq -r '[
+		.dependencies[] as $pkg
+		| $pkg.vulns[]?
+		| .aliases[]?
+		| select(startswith("CVE-")) as $cveId
+		| {
+			name: ($pkg.name // ""),
+			'$filter_full'version: ($pkg.version // ""),
+			ecosystem: "PyPI",
+			cveId: $cveId,
+			cvss: -1,
+			epss: -1,
+			percentile: -1,
+			state: "not-fixed",
+			impact: ""
+			}
+	]' "$filepath"
 
 # Vanir
 elif jq -e 'all(.missing_patches[]; has("ID"))' "$filepath" &> /dev/null; then
