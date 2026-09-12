@@ -1,10 +1,17 @@
 #!/bin/bash
 
 list_available() {
-	find "out/$1/" -mindepth 2 -maxdepth 6 -iname "*.json" -o -type d | \
-		cut -d/ -f3- | \
-		# sed -E "s/\.json//" | \
-		sort -u
+	if [ -d "$out/$1" ]; then
+		local res="$(find "out/$1/" -mindepth 2 -maxdepth 6 -iname "*.json" -o -type d | \
+			cut -d/ -f3- | \
+			# sed -E "s/\.json//" | \
+			sort -u)"
+		if [ -n "$res" ]; then
+			echo "$res"
+			return
+		fi
+	fi
+	compgen -f
 }
 list_os() {
 	list_available "os"

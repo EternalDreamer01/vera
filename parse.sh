@@ -15,7 +15,7 @@
 ################################################################################
 
 usage() {
-	echo "Usage: $0 { f | m | t } ARGS..."
+	echo "Usage: $(basename "$0") { f | m | t } ARGS..."
 }
 
 path="$(realpath "$(dirname "$0")/src/parser/")"
@@ -85,7 +85,7 @@ case "$option" in
 		echo
 		echo "If the first argument starts by:"
 		echo "  - CVE-, it will be passed to the cve command,"
-		echo "  - a dash (-) or is a valid inspect command, it will be treated as so."
+		echo "  - a dash (-) or is a valid inspect command, it will be treated as such."
 		;;
 	*)
 		res="$("$path/inspect.sh" "$option" 2> /dev/null)"

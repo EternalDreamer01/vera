@@ -19,10 +19,15 @@ usage() {
 	echo "Usage: $(basename "$0") [option] FILE" >&2
 }
 
+# echo "$0"
+
 default_resultfile="$(realpath "$(dirname "$0")/../../out/os")"
 resultfile="$default_resultfile"
 result=
 result_cbt=
+PROJECT_ROOT="$(realpath "$(dirname "$0")/../..")"
+
+# echo "$default_resultfile"
 
 parse_args() {
 	default_resultfile="$1"
@@ -44,6 +49,8 @@ parse_args() {
 	if [ $# -gt 0 ] && [ -f "${!#}" ]; then
 		resultfile="${!#}"
 	fi
+
+	# echo "$resultfile"
 
 	if [ ! -f "$resultfile" ] && [ ! -d "$resultfile" ]; then
 		echo "Error: File '$resultfile' doesn't exist" >&2
@@ -116,7 +123,7 @@ count_cves() {
 }
 
 print_overview() {
-	if [ -z "$severity" ]; then
+	if [ -z "$severity" ] || [ "$severity" = "-S" ] || [ "$severity" = "--summary" ]; then
 		total=$(count_cves)
 
 		total_epss=$(echo "$result" | cut -d: -f2 | grep -viE 'null|-1|^$' | grep -c '^')
@@ -179,6 +186,7 @@ print_overview() {
 		echo -e "  \e[33mMEDIUM:        $medium\e[0m"
 		echo -e "  \e[2;33mLOW:           $low\e[0m"
 		echo -e "  \e[1;2mUNKNOWN:       $unknown\e[0m"
+		echo
 
 	elif [ "$severity" = "-A" ] || [ "$severity" = "--all" ]; then
 		colour=""
@@ -216,7 +224,7 @@ cves_sort_options=(cvss epss risk)
 while [[ "$#" -gt 0 ]]; do
 # for i in "$@"; do
 	case $1 in
-		--all|--critical|--high|--medium|--low|--unknown|-A|-C|-H|-M|-L|-U)
+		--summary|-S|--all|--critical|--high|--medium|--low|--unknown|-A|-C|-H|-M|-L|-U)
 			severity="$1"
 			;;
 		--gui|--cli|--lib|--network-gui|--sdv|-g|-t|-l|-ng|--network|-n)
@@ -374,6 +382,7 @@ if $help; then
 	usage
 	echo
 	echo "Scoring:"
+	echo "  -S, --summary      Summary of all CVSS"
 	echo "  -A, --all          All CVSS"
 	echo "  -C, --critical     Critical CVSS"
 	echo "  -H, --high         High CVSS"
@@ -405,7 +414,7 @@ if $help; then
 	echo "      --filter-out=STR Filter out STR"
 	echo "      --any-state    Include fixed CVE"
 	echo "      --cve=CVE      Search for a CVE"
-	echo "      --exploit      Online exploit status (only for: $(printf "CVSS ≥ %s; EPSS ≥ %s%%" $(grep -E '^(CVSS|EPSS)_THRESHOLD\s*=\s*' src/parser/utils/get_online_exploits_multiple.py | sort | sed -r 's/.+=//; s/0\.([0-9]{,2})([0-9]{,3})/\1.\2/; s/00\./0./')))"
+	echo "      --exploit      Online exploit status (only for: $(printf "CVSS ≥ %s; EPSS ≥ %s%%" $(grep -E '^(CVSS|EPSS)_THRESHOLD\s*=\s*' "$PROJECT_ROOT/src/parser/utils/get_online_exploits_multiple.py" | sort | sed -r 's/.+=//; s/0\.([0-9]{,2})([0-9]{,3})/\1.\2/; s/00\./0./')))"
 	echo "  -u, --unify        "
 	echo "      --cbt          Merge with CVE Binary Tool"
 	echo "  -h, --help         Show this help"
@@ -435,7 +444,7 @@ parse_args "$default_resultfile" "$ARGS"
 
 ARGS="$(join_by ' ' $(echo "$ARGS" | sed -r 's/--sort(=|\s+)[a-z]+|--no-vendor//g; s/\s+/\n/g' | grep -E '^-'))"
 
-if [ -z "$severity" ]; then
+if [ -z "$severity" ] && [ "$severity" != "-S" ] && [ "$severity" != "--summary" ]; then
 	ARGS="-A $ARGS"
 fi
 
@@ -451,6 +460,7 @@ create_impact_filter() {
 		cat
 	fi
 }
+
 show_results() {
 	filepath="$1"
 	shift
@@ -459,11 +469,11 @@ show_results() {
 
 	result_cbt=
 	if [ "$merge_cbt" = true ] && [ -f "$resultfile/raw.cbt.json" ]; then
-		source src/parser/utils/merge.sh
+		source "$PROJECT_ROOT/src/parser/utils/merge.sh"
 		result_cbt="$(merge_results "$result" "$resultfile/raw.cbt.json")"
 
 		if [ "$PREVIEW_EXPLOIT" = true ]; then
-			result_cbt="$(src/parser/utils/get_online_exploits_multiple.py "$result_cbt")"
+			result_cbt="$("$PROJECT_ROOT/src/parser/utils/get_online_exploits_multiple.py" "$result_cbt")"
 		fi
 	fi
 	if [ -z "$severity" ]; then
@@ -504,7 +514,7 @@ $result_cbt"
 		result_cbt=
 		print_overview
 	else
-		echo "$result" | column -ts : -c 3 | sort -k1,1 -n -t' ' | src/parser/utils/score-colour.sed
+		echo "$result" | column -ts : -c 3 | sort -k1,1 -n -t' ' | "$PROJECT_ROOT/src/parser/utils/score-colour.sed"
 	fi
 }
 
@@ -564,7 +574,7 @@ elif [ -d "$resultfile" ]; then
 __inspect() {
 	local filepath="$(echo "$1" | sed -E 's/(.+\/){0,1}out\/os\/|\.json$//g')"
 	# echo "$(realpath $PWD/src/parser/inspect.sh)" "$@" >&2
-	local result="$("$(realpath $PWD/src/parser/inspect.sh)" "$@")"
+	local result="$("$PROJECT_ROOT/src/parser/inspect.sh" "$@")"
 
 	if [ -z "$result" ]; then
 		return
@@ -618,7 +628,7 @@ __only_libs() {
 }
 
 __filter_sdv() {
-	src/parser/utils/filter-sdv.sh
+	"$PROJECT_ROOT/src/parser/utils/filter-sdv.sh"
 }
 
 __filter() {
@@ -681,12 +691,12 @@ sort_option_switch() {
 	esac
 }
 
-result="$(src/parser/utils/read-report.sh "$resultfile" --filter-out-impact "$FILTER_OUT_IMPACT" $any_state | $pkg_type)"
+result="$("$PROJECT_ROOT/src/parser/utils/read-report.sh" "$resultfile" --filter-out-impact "$FILTER_OUT_IMPACT" $any_state | $pkg_type)"
 
 
 if ! [ "$no_ignore_dir" = true ]; then
 	# echo "Ignoring ! $no_ignore_dir"
-	ignore="$(eval cat "$(realpath "$(dirname "$0")/../../inspectignore/*")" 2> /dev/null | cut '-d#' -f1  | sed -Ez 's/\s*\n\s*/|/g; s/^\||\|$//g' | xargs)"
+	ignore="$(eval cat "$PROJECT_ROOT/inspectignore/*" 2> /dev/null | cut '-d#' -f1  | sed -Ez 's/\s*\n\s*/|/g; s/^\||\|$//g' | xargs)"
 	# echo "$ignore"
 
 	if [ -n "$ignore" ]; then
@@ -695,7 +705,7 @@ if ! [ "$no_ignore_dir" = true ]; then
 fi
 
 if [ "$PREVIEW_EXPLOIT" = true ]; then
-	result="$(src/parser/utils/get_online_exploits_multiple.py "$(echo -n "$result" | cut -d: -f1-6 | grep -vE '^[0-5](\.[0-9]+)?:|:0\.000[0-2][0-9]*:')")"
+	result="$("$PROJECT_ROOT/src/parser/utils/get_online_exploits_multiple.py" "$(echo -n "$result" | cut -d: -f1-6 | grep -vE '^[0-5](\.[0-9]+)?:|:0\.000[0-2][0-9]*:')")"
 fi
 
 print_overview

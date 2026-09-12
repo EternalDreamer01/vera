@@ -38,6 +38,9 @@ if [ -n "$1" ]; then
 	shift
 fi
 
+# echo "SCANNER: $SCANNER"
+# echo "FILTER: $FILTER"
+# echo "OUT_TYPE: $OUT_TYPE"
 
 count_cvss() {
 	local min=${1:--1}
@@ -305,21 +308,24 @@ else
 	printf "\e[1m|:-%-${FIRST_COL_LEN}s  \e[1;2m|:-:        \e[1;2;33m|:-:        \e[0;1;33m|:-:        \e[1;31m|:-:        \e[1;35m|:-:        |\e[0;1m:-:              |\e[0m:-:              \e[1;31m|:-:        \e[0;36m|:-:        |\e[0m\n"
 fi
 
-cves_type=upgraded
+cves_type=raw
 if [ "$DEFAULT_SCANNER" = true ]; then
 	SCANNER=grype
 fi
 if [ "$SCANNER" = "grype" ]; then
-	result_os "eclipse-sdv/158" "Eclipse S-CORE"
-	result_os "ubuntu/22.04" "Ubuntu 22.04"
-	result_os "ubuntu/22.04" "Ubuntu 20.04"
-	result_os "vxbuild/22.04" "VxWorks 7"
-	result_os "vxros2build/humble" "VxWorks 7 ROS2"
-	result_os "qnxros2/rolling" "QNX Neutrino"
-	result_os "zephyr/latest" "Zephyr"
-	result_os "teslaos/amd-5.4" TeslaOS
-	result_os "automotive-sig/9-qemux86_64" "AutoSD"
-	result_os "ros/humble-perception-jammy" ROS2
+	# result_os "eclipse-sdv/158" "Eclipse S-CORE"
+	# result_os "ubuntu/22.04" "Ubuntu 22.04"
+	# result_os "ubuntu/22.04" "Ubuntu 20.04"
+	# result_os "vxbuild/22.04" "VxWorks 7"
+	# result_os "vxros2build/humble" "VxWorks 7 ROS2"
+	# result_os "qnxros2/rolling" "QNX Neutrino"
+	# result_os "zephyr/latest" "Zephyr"
+	# result_os "teslaos/amd-5.4" TeslaOS
+	# result_os "automotive-sig/9-qemux86_64" "AutoSD"
+	# result_os "ros/humble-perception-jammy" ROS2
+	result_os "raspberrypi-os/python3.9" "Raspberry Pi OS Python 3.9"
+	result_os "ubuntu/24.04" "Ubuntu 24.04"
+	result_os "linuxmintd/mint21.3-amd64" "Linux Mint 21.3"
 fi
 
 cves_type=raw

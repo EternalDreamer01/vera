@@ -90,6 +90,8 @@ get_epss() {
 }
 
 
+PROJECT_ROOT="$(realpath "$(dirname "$0")/../..")"
+
 if [[ "$path" == "d" || "$path" == "desc" || "$path" == "description" ]]; then
 	if [[ "$cveId" != CVE-* ]]; then
 		path=".details"
@@ -101,7 +103,7 @@ if [[ "$path" == "d" || "$path" == "desc" || "$path" == "description" ]]; then
 elif [[ "$path" == "e" || "$path" == "exploit" ]]; then
 	is_kev
 
-	exploits="$(src/parser/utils/get-online-exploits.sh "$cveId")"
+	exploits="$("$PROJECT_ROOT/src/parser/utils/get-online-exploits.sh" "$cveId")"
 	exploits="$(echo "$exploits" | sed -r '/^\s*$/d' | sort -u | sort -k1,1 -rnt\;)"
 	exploit_option="$1"
 	exploits_num=$(echo -n "$exploits" | grep -c '^')
@@ -255,7 +257,7 @@ elif [[ "$path" == "s" || "$path" == "score" ]]; then
 
 	if [[ "$cveId" != CVE-* ]]; then
 		data="$("$0" "$cveId" ".affected[]?.ecosystem_specific" -r)"
-		echo "Severity: $(echo -n "$data" | jq -r .severity | head -n 1 | src/parser/utils/score-colour.sed)"
+		echo "Severity: $(echo -n "$data" | jq -r .severity | head -n 1 | "$PROJECT_ROOT/src/parser/utils/score-colour.sed")"
 		echo -n "$data" | jq -rs '"Type:     " + (
 			[
 				.. | .types? // empty | .[]?
@@ -269,8 +271,8 @@ elif [[ "$path" == "s" || "$path" == "score" ]]; then
 
 	else
 		epss_entries="$(get_epss "$cveId")"
-		echo "EPSS:       $(echo "$epss_entries" | cut '-d|' -f1 | src/parser/utils/score-colour.sed)"
-		echo "Percentile: $(echo "$epss_entries" | cut '-d|' -f2 | src/parser/utils/score-colour.sed)"
+		echo "EPSS:       $(echo "$epss_entries" | cut '-d|' -f1 | "$PROJECT_ROOT/src/parser/utils/score-colour.sed")"
+		echo "Percentile: $(echo "$epss_entries" | cut '-d|' -f2 | "$PROJECT_ROOT/src/parser/utils/score-colour.sed")"
 		echo
 		output="$("$0" "$cveId" '
 	.containers.cna.metrics // [] 
@@ -322,5 +324,5 @@ else
 # echo "CVE Prefix: $cve_prefix"
 
 	# echo "$args"
-	jq "$path" $args "$(realpath "$(dirname "$0")/../../cvelistV5/cves/$year/${cve_prefix}xxx/CVE-$year-$num.json")"
+	jq "$path" $args "$PROJECT_ROOT/cvelistV5/cves/$year/${cve_prefix}xxx/CVE-$year-$num.json"
 fi
