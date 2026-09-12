@@ -166,6 +166,7 @@ elif [[ "$path" == "e" || "$path" == "exploit" ]]; then
 
 	# echo "CVE News: $([[ -n "$cve_news" ]] && echo 1 || echo 0)"
 	[[ -n "$cve_news" ]] && echo "  https://www.cve.news/${cveId,,}/"
+	[[ -n "$sentinelone" ]] && echo "  https://www.sentinelone.com/vulnerability-database/${cveId,,}/"
 
 	exit 0
 
