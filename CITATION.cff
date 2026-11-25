@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+message: If you use this work, please cite it as below.
+title: Monitoring Vulnerabilities in Next-Generation Automotive Operating Systems
+authors:
+  - family-names: Simon
+    given-names: Dimitri
+  - family-names: Hammi
+    given-names: Badis
+  - family-names: Garcia-Alfaro
+    given-names: Joaquin
+  - family-names: Debar
+    given-names: Hervé
+preferred-citation:
+  type: article
+  title: Monitoring Vulnerabilities in Next-Generation Automotive Operating Systems
+  authors:
+    - family-names: Simon
+      given-names: Dimitri
+    - family-names: Hammi
+      given-names: Badis
+    - family-names: Garcia-Alfaro
+      given-names: Joaquin
+    - family-names: Debar
+      given-names: Hervé
+  journal: IEEE Internet of Things Journal
+  volume: 13
+  issue: 20
+  start: 46299
+  end: 46317
+  year: 2026
+  doi: 10.1109/JIOT.2026.3711962
+  keywords:
+    - Operating systems
+    - Vehicles
+    - Automotive engineering
+    - Android
+    - Security
+    - Safety
+    - Containers
+    - ISO
+    - Software
+    - Middleware
+    - Common vulnerabilities and exposures (CVEs)
+    - cybersecurity
+    - pentesting
+    - software-defined vehicle (SDV)
+    - vulnerability scanner
